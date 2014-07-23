@@ -32,7 +32,6 @@ use std::c_str::ToCStr;
 use std::ptr;
 use std::rc::Rc;
 use std::collections::{HashMap, HashSet};
-use syntax::abi;
 use syntax::ast;
 use syntax::parse::token::InternedString;
 
@@ -145,8 +144,8 @@ impl CrateContext {
                 llvm::LLVMModuleCreateWithNameInContext(buf, llcx)
             });
             tcx.sess
-               .targ_cfg
-               .target_strs
+               .target
+               .target
                .data_layout
                .as_slice()
                .with_c_str(|buf| {
@@ -154,9 +153,9 @@ impl CrateContext {
                 llvm::LLVMSetDataLayout(metadata_llmod, buf);
             });
             tcx.sess
-               .targ_cfg
-               .target_strs
-               .target_triple
+               .target
+               .target
+               .llvm_target
                .as_slice()
                .with_c_str(|buf| {
                 llvm::LLVMRustSetNormalizedTarget(llmod, buf);
@@ -164,8 +163,8 @@ impl CrateContext {
             });
 
             let td = mk_target_data(tcx.sess
-                                       .targ_cfg
-                                       .target_strs
+                                       .target
+                                       .target
                                        .data_layout
                                        .as_slice());
 
@@ -275,16 +274,8 @@ impl CrateContext {
         }
     }
 
-    // Although there is an experimental implementation of LLVM which
-    // supports SS on armv7 it wasn't approved by Apple, see:
-    // http://lists.cs.uiuc.edu/pipermail/llvm-commits/Week-of-Mon-20140505/216350.html
-    // It looks like it might be never accepted to upstream LLVM.
-    //
-    // So far the decision was to disable them in default builds
-    // but it could be enabled (with patched LLVM)
     pub fn is_split_stack_supported(&self) -> bool {
-        let ref cfg = self.sess().targ_cfg;
-        cfg.os != abi::OsiOS || cfg.arch != abi::Arm
+        self.sess().target.target.options.morestack
     }
 }
 
