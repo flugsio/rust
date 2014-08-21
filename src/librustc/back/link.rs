@@ -950,7 +950,8 @@ pub fn filename_for_input(sess: &Session,
             out_filename.with_filename(format!("lib{}.a", libname))
         }
         config::CrateTypeExecutable => {
-            out_filename.with_extension(sess.target.target.options.exe_suffix.as_slice())
+            let suffix = sess.target.target.options.exe_suffix.as_slice();
+            out_filename.with_filename(format!("{}{}", libname, suffix))
         }
     }
 }
@@ -1408,7 +1409,7 @@ fn link_args(cmd: &mut Command,
     // subset we wanted.
     if !t.options.is_like_windows {
         cmd.arg("-nodefaultlibs");
-
+    } else {
         // Always enable DEP (NX bit) when it is available
         cmd.arg("-Wl,--nxcompat");
 

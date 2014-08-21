@@ -404,7 +404,7 @@ pub fn default_lib_output() -> CrateType {
 }
 
 pub fn default_configuration(sess: &Session) -> ast::CrateConfig {
-    use intern = syntax::parse::token::intern_and_get_ident;
+    use syntax::parse::token::intern_and_get_ident as intern;
 
     let end = sess.target.target.target_endian.as_slice();
     let arch = sess.target.target.arch.as_slice();

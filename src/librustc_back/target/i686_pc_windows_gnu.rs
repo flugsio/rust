@@ -8,9 +8,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use target::Target;
+use target::{Target, TargetOptions};
 
 pub fn target() -> Target {
+    let base = super::windows_base::opts();
     Target {
         data_layout: "e-p:32:32-f64:64:64-i64:64:64-f80:32:32-n8:16:32".to_string(),
         llvm_target: "i686-pc-windows-gnu".to_string(),
@@ -18,6 +19,12 @@ pub fn target() -> Target {
         target_word_size: "32".to_string(),
         arch: "x86".to_string(),
         target_os: "windows".to_string(),
-        options: super::windows_base::opts()
+        options: TargetOptions {
+            pre_link_args: base.pre_link_args.clone().append(&[
+            	"-shared-libgcc".to_string(),
+            	"-Wl,--large-address-aware".to_string()
+			]),
+            .. base
+        }
     }
 }
